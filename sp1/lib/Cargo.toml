@@ -1,0 +1,12 @@
+[package]
+name = "fibonacci-lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { version = "1", default-features = false }
+alloy-sol-types = { workspace = true }
+fuel-core-executor = { version = "0.36.0", default-features = false, features = ["alloc"] }
+fuel-core-storage = { version = "0.36.0", default-features = false, features = ["alloc"] }
+fuel-core-types = { version = "0.36.0", default-features = false, features = ["serde", "test-helpers"] }
+serde_json = { version = "1", default-features = false }
