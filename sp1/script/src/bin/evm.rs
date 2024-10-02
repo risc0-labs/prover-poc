@@ -71,8 +71,6 @@ async fn main() {
         .await
         .unwrap();
 
-    let serialized_input = bincode::serialize(&service.input).unwrap();
-
     // Parse the command line arguments.
     let args = EVMArgs::parse();
 
@@ -84,7 +82,7 @@ async fn main() {
 
     // Setup the inputs.
     let mut stdin = SP1Stdin::new();
-    stdin.write(&serialized_input);
+    stdin.write(&service.input);
 
     println!("Proof System: {:?}", args.system);
 
