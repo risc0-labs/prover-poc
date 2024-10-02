@@ -1,5 +1,4 @@
 use crate::{
-    logs::init_logging,
     relayer_recorer::RelayerRecorder,
     storage_access_recorder::StorageAccessRecorder,
 };
@@ -179,6 +178,7 @@ pub async fn start_node_with_transaction_and_produce_prover_input(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::logs::init_logging;
 
     #[tokio::test]
     async fn prover_can_verify() {
