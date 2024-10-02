@@ -9,20 +9,22 @@
 sp1_zkvm::entrypoint!(main);
 
 use alloy_sol_types::SolType;
-use fibonacci_lib::{fibonacci, PublicValuesStruct};
+use prover::{
+    prove,
+    PublicValuesStruct,
+};
 
 pub fn main() {
     // Read an input to the program.
     //
     // Behind the scenes, this compiles down to a custom system call which handles reading inputs
     // from the prover.
-    let n = sp1_zkvm::io::read::<u32>();
+    let bytes = sp1_zkvm::io::read_vec();
 
-    // Compute the n'th fibonacci number using a function from the workspace lib crate.
-    let (a, b) = fibonacci(n);
+    let proof = prove(&bytes).expect("Proof generation failed");
 
     // Encode the public values of the program.
-    let bytes = PublicValuesStruct::abi_encode(&PublicValuesStruct { n, a, b });
+    let bytes = PublicValuesStruct::abi_encode(&proof);
 
     // Commit to the public values of the program. The final proof will have a commitment to all the
     // bytes that were committed to.

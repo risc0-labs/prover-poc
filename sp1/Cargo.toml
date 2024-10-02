@@ -1,6 +1,7 @@
 [workspace]
 members = [
-    "lib",
+    "input-provider",
+    "prover",
     "program",
     "script",
 ]
@@ -8,6 +9,8 @@ resolver = "2"
 
 [workspace.dependencies]
 alloy-sol-types = "0.7.7"
+prover = { path = "prover" }
+input-provider = { path = "input-provider" }
 
 [profile.release]
 codegen-units = 1

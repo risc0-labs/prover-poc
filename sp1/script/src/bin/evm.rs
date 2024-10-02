@@ -11,14 +11,28 @@
 //! ```
 
 use alloy_sol_types::SolType;
-use clap::{Parser, ValueEnum};
-use fibonacci_lib::PublicValuesStruct;
-use serde::{Deserialize, Serialize};
-use sp1_sdk::{HashableKey, ProverClient, SP1ProofWithPublicValues, SP1Stdin, SP1VerifyingKey};
+use clap::{
+    Parser,
+    ValueEnum,
+};
+use input_provider::start_node_with_transaction_and_produce_prover_input;
+use prover::PublicValuesStruct;
+use serde::{
+    Deserialize,
+    Serialize,
+};
+use sp1_sdk::{
+    HashableKey,
+    ProverClient,
+    SP1ProofWithPublicValues,
+    SP1Stdin,
+    SP1VerifyingKey,
+};
 use std::path::PathBuf;
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const FIBONACCI_ELF: &[u8] = include_bytes!("../../../elf/riscv32im-succinct-zkvm-elf");
+pub const FIBONACCI_ELF: &[u8] =
+    include_bytes!("../../../elf/riscv32im-succinct-zkvm-elf");
 
 /// The arguments for the EVM command.
 #[derive(Parser, Debug)]
@@ -41,17 +55,23 @@ enum ProofSystem {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct SP1FibonacciProofFixture {
-    a: u32,
-    b: u32,
-    n: u32,
+    block_id: [u8; 32],
+    input_hash: [u8; 32],
     vkey: String,
     public_values: String,
     proof: String,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Setup the logger.
     sp1_sdk::utils::setup_logger();
+
+    let service = start_node_with_transaction_and_produce_prover_input()
+        .await
+        .unwrap();
+
+    let serialized_input = bincode::serialize(&service.input).unwrap();
 
     // Parse the command line arguments.
     let args = EVMArgs::parse();
@@ -64,9 +84,8 @@ fn main() {
 
     // Setup the inputs.
     let mut stdin = SP1Stdin::new();
-    stdin.write(&args.n);
+    stdin.write(&serialized_input);
 
-    println!("n: {}", args.n);
     println!("Proof System: {:?}", args.system);
 
     // Generate the proof based on the selected proof system.
@@ -87,13 +106,15 @@ fn create_proof_fixture(
 ) {
     // Deserialize the public values.
     let bytes = proof.public_values.as_slice();
-    let PublicValuesStruct { n, a, b } = PublicValuesStruct::abi_decode(bytes, false).unwrap();
+    let PublicValuesStruct {
+        input_hash,
+        block_id,
+    } = PublicValuesStruct::abi_decode(bytes, false).unwrap();
 
     // Create the testing fixture so we can test things end-to-end.
     let fixture = SP1FibonacciProofFixture {
-        a,
-        b,
-        n,
+        block_id: block_id.to_be_bytes(),
+        input_hash: input_hash.to_be_bytes(),
         vkey: vk.bytes32().to_string(),
         public_values: format!("0x{}", hex::encode(bytes)),
         proof: format!("0x{}", hex::encode(proof.bytes())),
@@ -116,7 +137,8 @@ fn create_proof_fixture(
     println!("Proof Bytes: {}", fixture.proof);
 
     // Save the fixture to a file.
-    let fixture_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../contracts/src/fixtures");
+    let fixture_path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../contracts/src/fixtures");
     std::fs::create_dir_all(&fixture_path).expect("failed to create fixture path");
     std::fs::write(
         fixture_path.join(format!("{:?}-fixture.json", system).to_lowercase()),

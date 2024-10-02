@@ -5,7 +5,7 @@
         "max_inputs": 255,
         "max_outputs": 255,
         "max_witnesses": 255,
-        "max_gas_per_tx": 30000000,
+        "max_gas_per_tx": 1000000,
         "max_size": 112640,
         "max_bytecode_subsections": 256
       }
@@ -15,7 +15,7 @@
         "max_predicate_length": 102400,
         "max_predicate_data_length": 102400,
         "max_message_data_length": 102400,
-        "max_gas_per_predicate": 30000000
+        "max_gas_per_predicate": 1000000
       }
     },
     "script_params": {
@@ -290,7 +290,7 @@
       }
     },
     "base_asset_id": "0xf8f8b6283d7fa5b672b530cbb84fcccb4ff8dc40f8176ef4544ddb1f1952ad07",
-    "block_gas_limit": 30000000,
+    "block_gas_limit": 1000000,
     "privileged_address": "eb42c979046d091f4f524e1efd8d4ffad92629b9a506b268a511861b0dbf2366"
   }
 }

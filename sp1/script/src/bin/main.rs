@@ -12,11 +12,16 @@
 
 use alloy_sol_types::SolType;
 use clap::Parser;
-use fibonacci_lib::PublicValuesStruct;
-use sp1_sdk::{ProverClient, SP1Stdin};
+use input_provider::start_node_with_transaction_and_produce_prover_input;
+use prover::PublicValuesStruct;
+use sp1_sdk::{
+    ProverClient,
+    SP1Stdin,
+};
 
 /// The ELF (executable and linkable format) file for the Succinct RISC-V zkVM.
-pub const FIBONACCI_ELF: &[u8] = include_bytes!("../../../elf/riscv32im-succinct-zkvm-elf");
+pub const FIBONACCI_ELF: &[u8] =
+    include_bytes!("../../../elf/riscv32im-succinct-zkvm-elf");
 
 /// The arguments for the command.
 #[derive(Parser, Debug)]
@@ -32,9 +37,16 @@ struct Args {
     n: u32,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Setup the logger.
     sp1_sdk::utils::setup_logger();
+
+    let service = start_node_with_transaction_and_produce_prover_input()
+        .await
+        .unwrap();
+
+    let serialized_input = bincode::serialize(&service.input).unwrap();
 
     // Parse the command line arguments.
     let args = Args::parse();
@@ -49,9 +61,7 @@ fn main() {
 
     // Setup the inputs.
     let mut stdin = SP1Stdin::new();
-    stdin.write(&args.n);
-
-    println!("n: {}", args.n);
+    stdin.write(&serialized_input);
 
     if args.execute {
         // Execute the program
@@ -59,16 +69,13 @@ fn main() {
         println!("Program executed successfully.");
 
         // Read the output.
-        let decoded = PublicValuesStruct::abi_decode(output.as_slice(), true).unwrap();
-        let PublicValuesStruct { n, a, b } = decoded;
-        println!("n: {}", n);
-        println!("a: {}", a);
-        println!("b: {}", b);
+        let proof = PublicValuesStruct::abi_decode(output.as_slice(), true).unwrap();
 
-        let (expected_a, expected_b) = fibonacci_lib::fibonacci(n);
-        assert_eq!(a, expected_a);
-        assert_eq!(b, expected_b);
-        println!("Values are correct!");
+        let block_id: [u8; 32] = service.input.block.header().id().into();
+        assert_eq!(proof.block_id.to_be_bytes(), block_id);
+
+        println!("Proof block id: {:?}", proof.block_id);
+        println!("Proof input hash: {:?}", proof.input_hash);
 
         // Record the number of cycles executed.
         println!("Number of cycles: {}", report.total_instruction_count());
