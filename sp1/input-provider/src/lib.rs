@@ -108,6 +108,8 @@ fn get_config(path: &Path) -> Config {
     let mut config = Config::local_node_with_configs(chain_config, state_config);
     config.combined_db_config.state_rewind_policy = StateRewindPolicy::RewindFullRange;
     config.combined_db_config.database_path = path.to_path_buf();
+    config.utxo_validation = true;
+    config.txpool.utxo_validation = true;
 
     config
 }
