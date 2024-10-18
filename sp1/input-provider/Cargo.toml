@@ -7,15 +7,15 @@ edition = "2021"
 anyhow = { version = "1", default-features = false }
 alloy-sol-types = { workspace = true }
 bincode = "1"
-fuel-core = { version = "0.36.0", features = ["rocksdb", "wasm-executor", "relayer", "test-helpers"] }
-fuel-core-executor = { version = "0.36.0", default-features = false, features = ["alloc"] }
-fuel-core-storage = { version = "0.36.0", default-features = false, features = ["alloc"] }
-fuel-core-relayer = { version = "0.36.0" }
-fuel-core-types = { version = "0.36.0", default-features = false, features = ["serde", "test-helpers"] }
+fuel-core = { version = "0.40.0", features = ["rocksdb", "wasm-executor", "relayer", "test-helpers"] }
+fuel-core-executor = { version = "0.40.0", default-features = false, features = ["alloc"] }
+fuel-core-storage = { version = "0.40.0", default-features = false, features = ["alloc"] }
+fuel-core-relayer = { version = "0.40.0" }
+fuel-core-types = { version = "0.40.0", default-features = false, features = ["serde", "test-helpers"] }
 tracing = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 fuels = "0.66.5"
-fuels-core = "0.66.5"
+fuels-core = "0.66.9"
 tempfile = "3"
 serde_json = { version = "1", default-features = false }
 prover = { path = "../prover" }
