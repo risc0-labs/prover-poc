@@ -1,0 +1,11 @@
+[package]
+name = "prove_fuel"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+risc0-zkvm = { version = "1.1.2", default-features = false, features = ['std', 'heap-embedded-alloc'] }
+prover = { path = "../../prover" }
+alloy-sol-types = "0.7.7"
